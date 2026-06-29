@@ -27,7 +27,7 @@ export default async function DashboardPage() {
   return (
     <div className="p-8 max-w-5xl mx-auto">
       {/* Header */}
-      <div className="mb-8">
+      <div className="mb-8 anim-up anim-d1">
         <p className="text-slate-400 text-sm capitalize mb-1">{today}</p>
         <h1 className="text-3xl font-black text-slate-900">
           Bonjour, {user.name} 👋
@@ -56,7 +56,7 @@ export default async function DashboardPage() {
       )}
 
       {/* Stats cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8 anim-up anim-d3">
         {[
           {
             label: "Ville",
@@ -104,7 +104,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Actions */}
-      <div className="flex flex-wrap gap-3 mb-8">
+      <div className="flex flex-wrap gap-3 mb-8 anim-up anim-d4">
         <AgendaButton disabled={!user.city} />
         <Link href="/chat" className="btn-secondary flex items-center gap-2">
           <span>◎</span> Parler à Herald
@@ -115,7 +115,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Events */}
-      <div>
+      <div className="anim-up anim-d5">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-slate-900">
             {user.city ? `Événements à ${user.city}` : "Vos prochains événements"}

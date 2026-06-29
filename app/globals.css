@@ -2,6 +2,117 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ═══════════════════════════════════════════════════
+   HERALD · SYSTÈME D'ANIMATIONS (inspiré cryox.be)
+═══════════════════════════════════════════════════ */
+
+/* ── Keyframes ─────────────────────────────────── */
+
+@keyframes navReveal {
+  from { opacity: 0; transform: translateY(-110%); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes clipRevealUp {
+  from { clip-path: inset(0 0 100% 0); transform: translateY(12px); opacity: 0; }
+  to   { clip-path: inset(0 0 0% 0);   transform: translateY(0);    opacity: 1; }
+}
+
+@keyframes fadeUpIn {
+  from { opacity: 0; transform: translateY(36px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes lineExpand {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+@keyframes counterIn {
+  from { opacity: 0; transform: translateY(60px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Animations de chargement (appliquées directement) ── */
+.anim-nav  { animation: navReveal  0.75s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.anim-clip { animation: clipRevealUp 1s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.anim-up   { animation: fadeUpIn   0.85s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.anim-fade { animation: fadeIn     0.95s ease both; }
+.anim-line {
+  animation: lineExpand 1.1s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transform-origin: left;
+}
+
+/* Délais de décalage */
+.anim-d1 { animation-delay: 0.08s; }
+.anim-d2 { animation-delay: 0.16s; }
+.anim-d3 { animation-delay: 0.26s; }
+.anim-d4 { animation-delay: 0.36s; }
+.anim-d5 { animation-delay: 0.46s; }
+.anim-d6 { animation-delay: 0.58s; }
+.anim-d7 { animation-delay: 0.70s; }
+.anim-d8 { animation-delay: 0.85s; }
+
+/* ── Scroll reveal (activés par JS via .in) ────── */
+
+/* Fade + remontée */
+.sr {
+  opacity: 0;
+  transform: translateY(38px);
+  transition: opacity 0.75s ease,
+              transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.sr.in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Fade seul */
+.sr-fade {
+  opacity: 0;
+  transition: opacity 0.9s ease;
+}
+.sr-fade.in { opacity: 1; }
+
+/* Ligne qui s'étend */
+.sr-line {
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.95s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.sr-line.in { transform: scaleX(1); }
+
+/* Clip reveal pour les gros titres */
+.sr-clip { overflow: hidden; }
+.sr-clip > .clip-inner {
+  display: block;
+  transform: translateY(115%);
+  transition: transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.sr-clip.in > .clip-inner { transform: translateY(0); }
+
+/* Compteur / grand chiffre */
+.sr-counter {
+  opacity: 0;
+  transform: translateY(64px);
+  transition: opacity 0.7s ease,
+              transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.sr-counter.in { opacity: 1; transform: translateY(0); }
+
+/* Délais scroll reveal */
+.sr-d1 { transition-delay: 0.06s; }
+.sr-d2 { transition-delay: 0.14s; }
+.sr-d3 { transition-delay: 0.22s; }
+.sr-d4 { transition-delay: 0.30s; }
+.sr-d5 { transition-delay: 0.38s; }
+.sr-d6 { transition-delay: 0.46s; }
+
 :root {
   --herald-blue: #2563eb;
   --herald-dark: #1e40af;
