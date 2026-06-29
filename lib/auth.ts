@@ -49,7 +49,7 @@ export async function getAuthUser(): Promise<User | null> {
   if (!token) return null;
   const payload = await verifyToken(token);
   if (!payload) return null;
-  return getUserById(payload.sub);
+  return await getUserById(payload.sub);
 }
 
 export function toPublicUser(user: User) {

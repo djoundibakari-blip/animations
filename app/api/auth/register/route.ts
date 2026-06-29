@@ -33,7 +33,7 @@ export async function POST(request: Request) {
     }
 
     // Unicité email
-    const existing = getUserByEmail(email);
+    const existing = await getUserByEmail(email);
     if (existing) {
       return NextResponse.json({ error: "Un compte existe déjà avec cette adresse." }, { status: 409 });
     }
@@ -61,7 +61,7 @@ export async function POST(request: Request) {
       consentVersion: "1.0",
     };
 
-    saveUser(user);
+    await saveUser(user);
 
     const token = await createToken(user);
     const response = NextResponse.json(

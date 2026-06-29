@@ -40,7 +40,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const user = getUserByEmail(normalizedEmail);
+    const user = await getUserByEmail(normalizedEmail);
 
     if (!user || !verifyPassword(password, user.passwordHash)) {
       return NextResponse.json({ error: "E-mail ou mot de passe incorrect." }, { status: 401 });

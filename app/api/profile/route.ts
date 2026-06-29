@@ -46,7 +46,7 @@ export async function PUT(request: Request) {
     }
 
     void allowed; // acknowledge unused
-    const updated = updateUser(user.id, updates);
+    const updated = await updateUser(user.id, updates);
     if (!updated) return NextResponse.json({ error: "Utilisateur introuvable." }, { status: 404 });
 
     return NextResponse.json({ user: toPublicUser(updated) });

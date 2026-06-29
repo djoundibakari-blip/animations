@@ -41,7 +41,7 @@ export async function POST() {
     };
 
     // Sauvegarder dans la file d'attente (traité par le scheduler N8N ou un cron)
-    addPendingEmail(pending);
+    await addPendingEmail(pending);
 
     // Tentative d'envoi direct si SMTP configuré
     const smtpConfigured = !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);

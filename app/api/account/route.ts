@@ -6,7 +6,7 @@ export async function DELETE() {
   const user = await getAuthUser();
   if (!user) return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
 
-  const success = anonymizeUser(user.id);
+  const success = await anonymizeUser(user.id);
   if (!success) {
     return NextResponse.json({ error: "Suppression impossible." }, { status: 500 });
   }

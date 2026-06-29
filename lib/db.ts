@@ -1,72 +1,39 @@
-import fs from "fs";
-import path from "path";
-import type { User, UsersDB } from "@/types";
+import { kv } from "@vercel/kv";
+import type { User } from "@/types";
 
-const DATA_DIR =
-  process.env.HERALD_DATA_DIR ||
-  path.join(process.cwd(), "..", "data", "herald");
-const USERS_FILE = path.join(DATA_DIR, "users.json");
-const PENDING_DIR = path.join(DATA_DIR, "pending");
+const userKey  = (id: string)    => `user:${id}`;
+const emailKey = (email: string) => `email:${email.toLowerCase()}`;
 
-function ensureDirs() {
-  if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
-  if (!fs.existsSync(PENDING_DIR))
-    fs.mkdirSync(PENDING_DIR, { recursive: true });
+export async function getUserById(id: string): Promise<User | null> {
+  const user = await kv.get<User>(userKey(id));
+  if (!user || user.rgpdDeletion) return null;
+  return user;
 }
 
-export function loadDB(): UsersDB {
-  ensureDirs();
-  if (!fs.existsSync(USERS_FILE)) return { users: {} };
-  try {
-    return JSON.parse(fs.readFileSync(USERS_FILE, "utf8")) as UsersDB;
-  } catch {
-    return { users: {} };
-  }
+export async function getUserByEmail(email: string): Promise<User | null> {
+  const id = await kv.get<string>(emailKey(email.toLowerCase()));
+  if (!id) return null;
+  return getUserById(id);
 }
 
-export function saveDB(db: UsersDB): void {
-  ensureDirs();
-  fs.writeFileSync(USERS_FILE, JSON.stringify(db, null, 2), "utf8");
+export async function saveUser(user: User): Promise<void> {
+  await kv.set(userKey(user.id), user);
+  await kv.set(emailKey(user.email), user.id);
 }
 
-export function getUserById(id: string): User | null {
-  const db = loadDB();
-  const user = db.users[id];
-  return user && !user.rgpdDeletion ? user : null;
+export async function updateUser(id: string, updates: Partial<User>): Promise<User | null> {
+  const user = await getUserById(id);
+  if (!user) return null;
+  const updated: User = { ...user, ...updates, updatedAt: new Date().toISOString() };
+  await kv.set(userKey(id), updated);
+  return updated;
 }
 
-export function getUserByEmail(email: string): User | null {
-  const db = loadDB();
-  return (
-    Object.values(db.users).find(
-      (u) => u.email === email.toLowerCase() && !u.rgpdDeletion
-    ) ?? null
-  );
-}
-
-export function saveUser(user: User): void {
-  const db = loadDB();
-  db.users[user.id] = user;
-  saveDB(db);
-}
-
-export function updateUser(id: string, updates: Partial<User>): User | null {
-  const db = loadDB();
-  if (!db.users[id] || db.users[id].rgpdDeletion) return null;
-  db.users[id] = {
-    ...db.users[id],
-    ...updates,
-    updatedAt: new Date().toISOString(),
-  } as User;
-  saveDB(db);
-  return db.users[id];
-}
-
-export function anonymizeUser(id: string): boolean {
-  const db = loadDB();
-  if (!db.users[id]) return false;
-  const user = db.users[id];
-  db.users[id] = {
+export async function anonymizeUser(id: string): Promise<boolean> {
+  const user = await kv.get<User>(userKey(id));
+  if (!user) return false;
+  await kv.del(emailKey(user.email));
+  const anonymized: User = {
     id,
     email: "[SUPPRIME]",
     passwordHash: "[SUPPRIME]",
@@ -87,14 +54,12 @@ export function anonymizeUser(id: string): boolean {
     deletedAt: new Date().toISOString(),
     rgpdDeletion: true,
   };
-  saveDB(db);
+  await kv.set(userKey(id), anonymized);
   return true;
 }
 
-export function addPendingEmail(data: object): string {
-  ensureDirs();
-  const filename = `agenda_${Date.now()}.json`;
-  const filepath = path.join(PENDING_DIR, filename);
-  fs.writeFileSync(filepath, JSON.stringify(data, null, 2), "utf8");
-  return filepath;
+export async function addPendingEmail(data: object): Promise<string> {
+  const key = `pending:agenda_${Date.now()}`;
+  await kv.set(key, data, { ex: 60 * 60 * 24 * 7 }); // expire après 7 jours
+  return key;
 }
