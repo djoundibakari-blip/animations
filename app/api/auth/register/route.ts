@@ -76,7 +76,8 @@ export async function POST(request: Request) {
       path: "/",
     });
     return response;
-  } catch {
+  } catch (err) {
+    console.error("[register] erreur:", err);
     return NextResponse.json({ error: "Erreur serveur." }, { status: 500 });
   }
 }
