@@ -38,11 +38,12 @@ export default function AgendaButton({ disabled }: AgendaButtonProps) {
       <button
         onClick={handleSend}
         disabled={disabled || status === "loading"}
-        className="btn-primary flex items-center gap-2"
+        className="inline-flex items-center gap-2 font-black text-[11px] uppercase tracking-[0.2em] px-5 py-2.5 transition-all duration-200 disabled:opacity-25 disabled:cursor-not-allowed hover:opacity-90"
+        style={{ background: "#fff", color: "#08080e" }}
       >
         {status === "loading" ? (
           <>
-            <span className="animate-spin">⟳</span> Envoi…
+            <span className="animate-spin inline-block">⟳</span> Envoi…
           </>
         ) : (
           <>
@@ -51,10 +52,20 @@ export default function AgendaButton({ disabled }: AgendaButtonProps) {
         )}
       </button>
       {status === "success" && (
-        <p className="text-sm text-green-600 mt-1.5">✓ {message}</p>
+        <p
+          className="text-[10px] font-mono mt-1.5 uppercase tracking-[0.1em]"
+          style={{ color: "#34d399" }}
+        >
+          ✓ {message}
+        </p>
       )}
       {status === "error" && (
-        <p className="text-sm text-red-600 mt-1.5">✗ {message}</p>
+        <p
+          className="text-[10px] font-mono mt-1.5 uppercase tracking-[0.1em]"
+          style={{ color: "#f87171" }}
+        >
+          ✗ {message}
+        </p>
       )}
     </div>
   );

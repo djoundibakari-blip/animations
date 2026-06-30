@@ -13,6 +13,59 @@ const SCHEDULE_OPTIONS = [
 
 const DAYS = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"];
 
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  background: "rgba(255,255,255,0.04)",
+  border: "1px solid rgba(255,255,255,0.1)",
+  color: "rgba(255,255,255,0.85)",
+  padding: "10px 14px",
+  fontSize: "13px",
+  fontFamily: "inherit",
+  outline: "none",
+  transition: "border-color 0.2s",
+};
+
+function DarkInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
+  return (
+    <input
+      {...props}
+      style={inputStyle}
+      onFocus={(e) => { e.target.style.borderColor = "rgba(167,139,250,0.5)"; props.onFocus?.(e); }}
+      onBlur={(e) => { e.target.style.borderColor = "rgba(255,255,255,0.1)"; props.onBlur?.(e); }}
+    />
+  );
+}
+
+function DarkSelect(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
+  return (
+    <select
+      {...props}
+      style={{ ...inputStyle, cursor: "pointer" }}
+      onFocus={(e) => { e.target.style.borderColor = "rgba(167,139,250,0.5)"; props.onFocus?.(e); }}
+      onBlur={(e) => { e.target.style.borderColor = "rgba(255,255,255,0.1)"; props.onBlur?.(e); }}
+    />
+  );
+}
+
+function SectionLabel({ num, children }: { num: string; children: React.ReactNode }) {
+  return (
+    <div
+      className="flex items-center gap-4 pb-5 mb-6"
+      style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+    >
+      <span
+        className="font-mono text-[10px] tracking-[0.3em] shrink-0"
+        style={{ color: "rgba(167,139,250,0.5)" }}
+      >
+        {num}
+      </span>
+      <h2 className="font-black uppercase text-sm tracking-[0.12em]" style={{ color: "rgba(255,255,255,0.85)" }}>
+        {children}
+      </h2>
+    </div>
+  );
+}
+
 export default function ProfilePage() {
   const router = useRouter();
   const [user, setUser] = useState<PublicUser | null>(null);
@@ -66,7 +119,6 @@ export default function ProfilePage() {
     e.preventDefault();
     setSaving(true);
     setSaveMsg("");
-
     try {
       const res = await fetch("/api/profile", {
         method: "PUT",
@@ -74,12 +126,8 @@ export default function ProfilePage() {
         body: JSON.stringify(form),
       });
       const data = await res.json();
-      if (res.ok) {
-        setUser(data.user);
-        setSaveMsg("Profil mis à jour !");
-      } else {
-        setSaveMsg(data.error || "Erreur lors de la mise à jour.");
-      }
+      setSaveMsg(res.ok ? "Profil mis à jour !" : (data.error || "Erreur lors de la mise à jour."));
+      if (res.ok) setUser(data.user);
     } catch {
       setSaveMsg("Erreur réseau.");
     } finally {
@@ -92,10 +140,7 @@ export default function ProfilePage() {
     setDeleting(true);
     try {
       const res = await fetch("/api/account", { method: "DELETE" });
-      if (res.ok) {
-        router.push("/");
-        router.refresh();
-      }
+      if (res.ok) { router.push("/"); router.refresh(); }
     } catch {
       setDeleting(false);
     }
@@ -103,50 +148,102 @@ export default function ProfilePage() {
 
   if (!user) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="animate-spin text-herald-600 text-3xl">⟳</div>
+      <div className="flex min-h-screen items-center justify-center" style={{ background: "#08080e" }}>
+        <span className="animate-spin text-3xl" style={{ color: "rgba(167,139,250,0.6)" }}>⟳</span>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="flex min-h-screen" style={{ background: "#08080e", color: "#fff" }}>
       <Sidebar userName={user.name} userEmail={user.email} />
 
       <div className="flex-1 p-8 max-w-3xl mx-auto">
-        <h1 className="text-3xl font-black text-slate-900 mb-1">Mon profil</h1>
-        <p className="text-slate-400 mb-8">Gérez vos préférences et votre agenda</p>
 
-        <form onSubmit={handleSave} className="space-y-6">
-          {/* Localisation */}
-          <div className="card p-6">
-            <h2 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
-              <span>📍</span> Localisation
-            </h2>
-            <div className="grid sm:grid-cols-2 gap-4">
+        {/* ── Header ── */}
+        <div className="mb-10 anim-up anim-d1">
+          <div className="flex items-center gap-4 mb-5">
+            <div
+              className="h-[1px] w-8 anim-line"
+              style={{ background: "linear-gradient(90deg, #a78bfa, #60a5fa)" }}
+            />
+            <span
+              className="text-[10px] font-mono tracking-[0.4em] uppercase"
+              style={{ color: "rgba(167,139,250,0.7)" }}
+            >
+              Paramètres
+            </span>
+          </div>
+          <h1
+            className="font-black uppercase"
+            style={{ fontSize: "clamp(1.8rem, 4vw, 2.8rem)", lineHeight: 0.92, letterSpacing: "-0.02em" }}
+          >
+            Mon{" "}
+            <span
+              style={{
+                background: "linear-gradient(90deg, #a78bfa 0%, #60a5fa 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
+              Profil
+            </span>
+          </h1>
+          <p className="mt-2 text-sm" style={{ color: "rgba(255,255,255,0.3)" }}>
+            Gérez vos préférences et votre agenda personnalisé
+          </p>
+        </div>
+
+        <form onSubmit={handleSave} className="space-y-1">
+
+          {/* ── 01 · Localisation ── */}
+          <div className="p-6 anim-up anim-d2" style={{ background: "#0e0e18", border: "1px solid rgba(255,255,255,0.06)" }}>
+            <SectionLabel num="01">Localisation</SectionLabel>
+            <div className="grid sm:grid-cols-2 gap-4 mb-5">
               <div>
-                <label className="label">Ville</label>
-                <input
+                <label
+                  className="block text-[10px] font-mono uppercase tracking-[0.2em] mb-2"
+                  style={{ color: "rgba(255,255,255,0.35)" }}
+                >
+                  Ville
+                </label>
+                <DarkInput
                   type="text"
-                  className="input"
                   placeholder="ex: Paris, Lyon, Bordeaux…"
                   value={form.city}
                   onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
                 />
               </div>
               <div>
-                <label className="label">Région (optionnel)</label>
-                <input
+                <label
+                  className="block text-[10px] font-mono uppercase tracking-[0.2em] mb-2"
+                  style={{ color: "rgba(255,255,255,0.35)" }}
+                >
+                  Région <span style={{ color: "rgba(255,255,255,0.2)" }}>(optionnel)</span>
+                </label>
+                <DarkInput
                   type="text"
-                  className="input"
                   placeholder="ex: Île-de-France"
                   value={form.region}
                   onChange={(e) => setForm((f) => ({ ...f, region: e.target.value }))}
                 />
               </div>
             </div>
-            <div className="mt-4">
-              <label className="label">Rayon géographique : {form.radius} km</label>
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <label
+                  className="text-[10px] font-mono uppercase tracking-[0.2em]"
+                  style={{ color: "rgba(255,255,255,0.35)" }}
+                >
+                  Rayon géographique
+                </label>
+                <span
+                  className="font-black text-sm"
+                  style={{ color: "rgba(167,139,250,0.8)" }}
+                >
+                  {form.radius} km
+                </span>
+              </div>
               <input
                 type="range"
                 min={5}
@@ -154,20 +251,22 @@ export default function ProfilePage() {
                 step={5}
                 value={form.radius}
                 onChange={(e) => setForm((f) => ({ ...f, radius: parseInt(e.target.value) }))}
-                className="w-full accent-herald-600"
+                className="w-full"
+                style={{ accentColor: "#a78bfa" }}
               />
-              <div className="flex justify-between text-xs text-slate-400 mt-1">
+              <div
+                className="flex justify-between text-[9px] font-mono mt-1.5 uppercase tracking-[0.1em]"
+                style={{ color: "rgba(255,255,255,0.2)" }}
+              >
                 <span>5 km</span>
                 <span>200 km</span>
               </div>
             </div>
           </div>
 
-          {/* Préférences */}
-          <div className="card p-6">
-            <h2 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
-              <span>🎭</span> Préférences culturelles
-            </h2>
+          {/* ── 02 · Préférences ── */}
+          <div className="p-6 anim-up anim-d3" style={{ background: "#0e0e18", border: "1px solid rgba(255,255,255,0.06)" }}>
+            <SectionLabel num="02">Préférences culturelles</SectionLabel>
             <div className="flex flex-wrap gap-2">
               {AVAILABLE_PREFERENCES.map((pref) => {
                 const selected = form.preferences.includes(pref);
@@ -176,11 +275,24 @@ export default function ProfilePage() {
                     key={pref}
                     type="button"
                     onClick={() => togglePref(pref)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border ${
+                    className="px-4 py-2 text-xs font-black uppercase tracking-[0.1em] transition-all duration-150"
+                    style={
                       selected
-                        ? "bg-herald-600 text-white border-herald-600"
-                        : "bg-white text-slate-600 border-slate-200 hover:border-herald-400"
-                    }`}
+                        ? { background: "#fff", color: "#08080e", border: "1px solid #fff" }
+                        : { background: "transparent", color: "rgba(255,255,255,0.45)", border: "1px solid rgba(255,255,255,0.12)" }
+                    }
+                    onMouseEnter={(e) => {
+                      if (!selected) {
+                        e.currentTarget.style.borderColor = "rgba(167,139,250,0.5)";
+                        e.currentTarget.style.color = "rgba(255,255,255,0.75)";
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!selected) {
+                        e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)";
+                        e.currentTarget.style.color = "rgba(255,255,255,0.45)";
+                      }
+                    }}
                   >
                     {pref}
                   </button>
@@ -188,57 +300,70 @@ export default function ProfilePage() {
               })}
             </div>
             {form.preferences.length === 0 && (
-              <p className="text-sm text-slate-400 mt-3">
-                Sélectionnez au moins une catégorie pour des événements personnalisés.
+              <p
+                className="text-[10px] font-mono uppercase tracking-[0.15em] mt-4"
+                style={{ color: "rgba(255,255,255,0.22)" }}
+              >
+                Sélectionnez au moins une catégorie
               </p>
             )}
           </div>
 
-          {/* Agenda automatique */}
-          <div className="card p-6">
-            <h2 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
-              <span>📆</span> Agenda automatique
-            </h2>
+          {/* ── 03 · Agenda ── */}
+          <div className="p-6 anim-up anim-d4" style={{ background: "#0e0e18", border: "1px solid rgba(255,255,255,0.06)" }}>
+            <SectionLabel num="03">Agenda automatique</SectionLabel>
             <div className="grid sm:grid-cols-3 gap-4">
               <div>
-                <label className="label">Fréquence</label>
-                <select
-                  className="input"
+                <label
+                  className="block text-[10px] font-mono uppercase tracking-[0.2em] mb-2"
+                  style={{ color: "rgba(255,255,255,0.35)" }}
+                >
+                  Fréquence
+                </label>
+                <DarkSelect
                   value={form.schedule}
                   onChange={(e) => setForm((f) => ({ ...f, schedule: e.target.value }))}
                 >
-                  <option value="">— Choisir —</option>
+                  <option value="" style={{ background: "#0e0e18" }}>— Choisir —</option>
                   {SCHEDULE_OPTIONS.map((o) => (
-                    <option key={o.value} value={o.value}>
+                    <option key={o.value} value={o.value} style={{ background: "#0e0e18" }}>
                       {o.label}
                     </option>
                   ))}
-                </select>
+                </DarkSelect>
               </div>
 
               {form.schedule === "hebdomadaire" && (
                 <div>
-                  <label className="label">Jour</label>
-                  <select
-                    className="input"
+                  <label
+                    className="block text-[10px] font-mono uppercase tracking-[0.2em] mb-2"
+                    style={{ color: "rgba(255,255,255,0.35)" }}
+                  >
+                    Jour
+                  </label>
+                  <DarkSelect
                     value={form.scheduleDay}
                     onChange={(e) => setForm((f) => ({ ...f, scheduleDay: e.target.value }))}
                   >
-                    <option value="">— Choisir —</option>
+                    <option value="" style={{ background: "#0e0e18" }}>— Choisir —</option>
                     {DAYS.map((d) => (
-                      <option key={d} value={d}>
+                      <option key={d} value={d} style={{ background: "#0e0e18" }}>
                         {d.charAt(0).toUpperCase() + d.slice(1)}
                       </option>
                     ))}
-                  </select>
+                  </DarkSelect>
                 </div>
               )}
 
               <div>
-                <label className="label">Heure</label>
-                <input
+                <label
+                  className="block text-[10px] font-mono uppercase tracking-[0.2em] mb-2"
+                  style={{ color: "rgba(255,255,255,0.35)" }}
+                >
+                  Heure
+                </label>
+                <DarkInput
                   type="time"
-                  className="input"
                   value={form.scheduleTime}
                   onChange={(e) => setForm((f) => ({ ...f, scheduleTime: e.target.value }))}
                 />
@@ -246,61 +371,99 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Actions */}
-          <div className="flex items-center gap-4">
-            <button type="submit" className="btn-primary" disabled={saving}>
-              {saving ? "Enregistrement…" : "Enregistrer les modifications"}
+          {/* ── Save ── */}
+          <div className="flex items-center gap-5 pt-4 anim-up anim-d5">
+            <button
+              type="submit"
+              disabled={saving}
+              className="inline-flex items-center gap-2 font-black text-[11px] uppercase tracking-[0.2em] px-6 py-3 transition-all duration-200 disabled:opacity-40 hover:opacity-90"
+              style={{ background: "#fff", color: "#08080e" }}
+            >
+              {saving ? (
+                <><span className="animate-spin inline-block">⟳</span> Enregistrement…</>
+              ) : (
+                <>Enregistrer les modifications</>
+              )}
             </button>
             {saveMsg && (
               <span
-                className={`text-sm font-medium ${
-                  saveMsg.includes("✓") || saveMsg.includes("mis à jour")
-                    ? "text-green-600"
-                    : "text-red-600"
-                }`}
+                className="text-[10px] font-mono uppercase tracking-[0.15em]"
+                style={{
+                  color: saveMsg.includes("mis à jour") ? "#34d399" : "#f87171",
+                }}
               >
-                {saveMsg}
+                {saveMsg.includes("mis à jour") ? `✓ ${saveMsg}` : `✗ ${saveMsg}`}
               </span>
             )}
           </div>
         </form>
 
-        {/* RGPD */}
-        <div className="card p-6 mt-8 border-red-100">
-          <h2 className="font-bold text-red-700 mb-2 flex items-center gap-2">
-            <span>⚠️</span> Zone RGPD — Suppression de compte
-          </h2>
-          <p className="text-sm text-slate-500 mb-4">
-            Conformément au RGPD, vous pouvez demander la suppression de toutes vos données personnelles.
-            Cette action est irréversible.
+        {/* ── RGPD ── */}
+        <div
+          className="mt-10 p-6 anim-up anim-d6"
+          style={{
+            background: "rgba(239,68,68,0.04)",
+            border: "1px solid rgba(239,68,68,0.12)",
+            borderLeft: "2px solid rgba(239,68,68,0.5)",
+          }}
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <span
+              className="font-mono text-[10px] tracking-[0.3em]"
+              style={{ color: "rgba(239,68,68,0.5)" }}
+            >
+              RGPD
+            </span>
+            <h2
+              className="font-black uppercase text-sm tracking-[0.1em]"
+              style={{ color: "rgba(239,68,68,0.85)" }}
+            >
+              Suppression de compte
+            </h2>
+          </div>
+          <p
+            className="text-xs leading-relaxed mb-5"
+            style={{ color: "rgba(255,255,255,0.35)" }}
+          >
+            Conformément au RGPD, vous pouvez demander la suppression de toutes vos données
+            personnelles. Cette action est irréversible.
           </p>
 
           {!deleteConfirm ? (
             <button
               type="button"
-              className="btn-danger"
               onClick={() => setDeleteConfirm(true)}
+              className="font-black text-[11px] uppercase tracking-[0.2em] px-5 py-2.5 transition-all duration-200 hover:opacity-90"
+              style={{ background: "rgba(239,68,68,0.15)", color: "#f87171", border: "1px solid rgba(239,68,68,0.3)" }}
             >
               Supprimer mon compte et mes données
             </button>
           ) : (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <p className="text-sm font-semibold text-red-700 mb-3">
-                Êtes-vous sûr(e) ? Cette action supprimera définitivement votre compte.
+            <div
+              className="p-4"
+              style={{ background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.2)" }}
+            >
+              <p
+                className="text-xs font-black uppercase tracking-[0.1em] mb-4"
+                style={{ color: "rgba(239,68,68,0.9)" }}
+              >
+                Cette action supprimera définitivement votre compte. Confirmer ?
               </p>
               <div className="flex gap-3">
                 <button
                   type="button"
-                  className="btn-danger"
                   onClick={handleDelete}
                   disabled={deleting}
+                  className="font-black text-[11px] uppercase tracking-[0.2em] px-5 py-2.5 transition-all duration-200 disabled:opacity-40 hover:opacity-90"
+                  style={{ background: "#ef4444", color: "#fff" }}
                 >
-                  {deleting ? "Suppression…" : "Confirmer la suppression"}
+                  {deleting ? "Suppression…" : "Confirmer"}
                 </button>
                 <button
                   type="button"
-                  className="btn-secondary"
                   onClick={() => setDeleteConfirm(false)}
+                  className="font-black text-[11px] uppercase tracking-[0.2em] px-5 py-2.5 transition-all duration-200 hover:opacity-80"
+                  style={{ border: "1px solid rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.5)" }}
                 >
                   Annuler
                 </button>
@@ -308,11 +471,12 @@ export default function ProfilePage() {
             </div>
           )}
 
-          <p className="text-xs text-slate-400 mt-3">
-            Compte créé le{" "}
-            {new Date(user.createdAt).toLocaleDateString("fr-FR")}
-            {user.lastSentAt &&
-              ` · Dernier agenda : ${new Date(user.lastSentAt).toLocaleDateString("fr-FR")}`}
+          <p
+            className="text-[9px] font-mono uppercase tracking-[0.1em] mt-4"
+            style={{ color: "rgba(255,255,255,0.18)" }}
+          >
+            Compte créé le {new Date(user.createdAt).toLocaleDateString("fr-FR")}
+            {user.lastSentAt && ` · Dernier agenda : ${new Date(user.lastSentAt).toLocaleDateString("fr-FR")}`}
           </p>
         </div>
       </div>

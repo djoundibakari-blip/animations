@@ -25,50 +25,91 @@ export default function Sidebar({ userName, userEmail }: SidebarProps) {
   }
 
   return (
-    <aside className="w-60 shrink-0 h-screen sticky top-0 bg-white border-r border-slate-100 flex flex-col">
+    <aside
+      className="w-60 shrink-0 h-screen sticky top-0 flex flex-col"
+      style={{ background: "#0e0e18", borderRight: "1px solid rgba(255,255,255,0.06)" }}
+    >
       {/* Logo */}
-      <div className="p-5 border-b border-slate-100">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-herald-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-black text-sm">H</span>
+      <div className="p-5" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+        <div className="flex items-center gap-3">
+          <div
+            className="w-8 h-8 flex items-center justify-center shrink-0"
+            style={{ border: "1px solid rgba(255,255,255,0.18)", background: "rgba(255,255,255,0.07)" }}
+          >
+            <span className="font-black text-xs tracking-[3px]" style={{ color: "#fff" }}>H</span>
           </div>
           <div>
-            <p className="font-black text-herald-700 text-lg leading-none">HERALD</p>
-            <p className="text-xs text-slate-400 font-mono">your news</p>
+            <p className="font-black text-sm tracking-[0.28em] uppercase leading-none" style={{ color: "#fff" }}>
+              Herald
+            </p>
+            <p className="text-[9px] font-mono tracking-[0.2em] uppercase mt-0.5" style={{ color: "rgba(255,255,255,0.3)" }}>
+              your news
+            </p>
           </div>
         </div>
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 p-3 space-y-1">
+      <nav className="flex-1 p-3 space-y-0.5">
         {navItems.map((item) => {
           const active = pathname === item.href;
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                active
-                  ? "bg-herald-50 text-herald-700"
-                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-              }`}
+              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-all duration-200 relative"
+              style={{
+                color: active ? "#fff" : "rgba(255,255,255,0.4)",
+                background: active ? "rgba(255,255,255,0.06)" : "transparent",
+              }}
+              onMouseEnter={(e) => {
+                if (!active) {
+                  e.currentTarget.style.color = "rgba(255,255,255,0.75)";
+                  e.currentTarget.style.background = "rgba(255,255,255,0.04)";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!active) {
+                  e.currentTarget.style.color = "rgba(255,255,255,0.4)";
+                  e.currentTarget.style.background = "transparent";
+                }
+              }}
             >
-              <span className="text-base">{item.icon}</span>
-              {item.label}
+              {active && (
+                <div
+                  className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-5"
+                  style={{ background: "linear-gradient(180deg, #a78bfa, #60a5fa)" }}
+                />
+              )}
+              <span className="text-base leading-none">{item.icon}</span>
+              <span className="tracking-[0.02em] text-xs uppercase font-black">{item.label}</span>
             </Link>
           );
         })}
       </nav>
 
       {/* User */}
-      <div className="p-3 border-t border-slate-100">
+      <div className="p-3" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
         <div className="px-3 py-2 mb-1">
-          <p className="text-sm font-semibold text-slate-900 truncate">{userName}</p>
-          <p className="text-xs text-slate-400 truncate">{userEmail}</p>
+          <p className="text-sm font-semibold truncate" style={{ color: "rgba(255,255,255,0.7)" }}>
+            {userName}
+          </p>
+          <p className="text-[10px] font-mono truncate mt-0.5" style={{ color: "rgba(255,255,255,0.25)" }}>
+            {userEmail}
+          </p>
         </div>
         <button
           onClick={handleLogout}
-          className="w-full text-left px-3 py-2 text-sm text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+          className="w-full text-left px-3 py-2 text-[10px] font-mono uppercase tracking-[0.15em] transition-all duration-200"
+          style={{ color: "rgba(255,255,255,0.28)" }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.color = "#f87171";
+            e.currentTarget.style.background = "rgba(239,68,68,0.07)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.color = "rgba(255,255,255,0.28)";
+            e.currentTarget.style.background = "transparent";
+          }}
         >
           Se déconnecter
         </button>
